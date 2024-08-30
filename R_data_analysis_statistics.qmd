@@ -1,0 +1,454 @@
+---
+title: "The Effects of Television Exposure on the Accent of L2 Speakers of English: A Focus on Rhoticity"
+bibliography: "https://api.citedrive.com/bib/d163f7fd-61aa-481d-96ed-9cfab82635e0/references.bib?x=eyJpZCI6ICJkMTYzZjdmZC02MWFhLTQ4MWQtOTZlZC05Y2ZhYjgyNjM1ZTAiLCAidXNlciI6ICI1ODg1IiwgInNpZ25hdHVyZSI6ICIyNDhjYmFjODk1NGUxMmY3NzMyZWNlMDI0Y2FjZjU2Zjc4YmUyYzVkZmI3ZmQyMGEzYjk5N2E4OTc3NzlmMGI5In0=/bibliography.bib"
+author: "Student ID: 01/1153341"
+format:
+  html:
+    page-layout: full
+    theme: minty
+    toc: true
+    number-sections: true
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+
+library(tidyverse)
+library(kableExtra)
+library(dlookr)
+library(ggpubr)
+library(emmeans)
+library(janitor)
+
+library(lme4)
+library(lmerTest)
+library(sjPlot)
+library(car)
+
+# create variable "table style" and apply kableExtra styling options
+table_style <- c("striped", "hover", "condensed", "responsive") 
+options(kable_styling_bootstrap_options = table_style)
+
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+# Load and save the whole dataset into a variable
+whole_dataset <- read_csv('data_final.csv') 
+
+# Exclude the data with t-flapping, keep the ones with rhoticity and omit NA values
+whole_dataset %>% filter(variable != 't-flapping') %>% na.omit() -> rhoticity_dataset
+
+# Check the dataset does not have any NA values
+# rhoticity_dataset_cleaned <- any(is.na(rhoticity_dataset))
+# print(rhoticity_dataset_cleaned)
+
+# Here I filtered the rows which contain the NA values, they belong to the value column specifically for the words: driver, wears and learn
+# whole_dataset %>%
+  # filter_all(any_vars(is.na(.)))
+
+```
+
+# Introduction
+
+<p style="text-align: justify;">
+Many people nowadays embark on the journey of learning English as a second or foreign language, driven by various motivating reasons such as applying for higher education, working abroad, consuming different types of entertainment (e.g., movies, TV series, and music), and for communicating with people from other cultures, among other factors [@mahu2012learning]. Acquiring a new language beyond early childhood involves developing various skills, including listening, reading, writing and most notably, speaking. Speaking is often considered the most challenging aspect of learning a foreign language as it encompasses two key components: accuracy and fluency [@derakhshan2016developing]. Both of these components require practice through production and interaction, along with sufficient exposure to the foreign language for improvement. However, opportunities to interact with  native speakers of English may not always be readily available for second language learners. As a result, TV series and films have become increasingly popular means of exposure to English language, as well as a popular leisure activity for non-native users of English [@sockett2012beyond].
+</p>
+<p style="text-align: justify;"> 
+Streaming platforms such as Netflix and the widespread availability of content on the Internet have significantly increased accessibility to films and series produced in English for non-native audiences in the last decade. Consequently, studies have delved into the impact of media exposure on Second Language Acquisition (SLA) with and without subtitles, specifically focusing on vocabulary, listening comprehension, and pronunciation [@Mitterer_2009; @birules2016watching; @scheffler2023learning]. According to @scheffler2023learning, subtitled programmes can positively influence the development of L2 pronunciation in production, particularly when the subtitles are in the L2 target language. On the contrary, @wisniewska2020can argue that L2 pronunciation, specifically in production, is improved by exposure to uncaptioned L2 audiovisual materials, as well as with intentional focus on pronunciation. 
+</p>
+<p style="text-align: justify;"> 
+Furthermore, it's noteworthy that researchers have consistently found that participants view watching TV series or films as a motivating factor for studying English [@Wang_2012; @dizon2018netflix]. For instance, research by @dizon2018netflix suggests that the learning effectiveness of L2 students of English can be enhanced by streaming TV shows or movies on Netflix. This exposure provides them with access to L2 vocabulary, increases their motivation to learn, and offers pragmatic knowledge in the L2. Additionally, exceptional learners in L2 phonology, who have achieved a native-like accent, have reported that watching TV and films in the target language contributes to their exceptional pronunciation skills [@Moyer_2014].
+</p>
+<p style="text-align: justify;"> 
+The study of media exposure's influence on L2 phonology also encompasses dialect acquisition, where speakers can acquire a new accent or dialect; a phenomenon referred to as **Second Dialect Acquisition** (SDA) [@nycz2019media]. This can manifest in various ways, such as adopting a regional variety of one's first language (L1) due to mobility [@chambers1992dialect], or occurring when speakers encounter new dialects of an L2 [@drummond2013manchester]. According to @nycz2019media, SDA can potentially arise through either explicit or implicit learning processes. Implicit learning is more common in SDA, unfolding unconsciously as speakers gradually adjust their pronunciation to align with the surrounding dialect. In sociolinguistics, this is recognized as *accommodation* or *convergence* [@nycz2019media]. Moreover, *convergence* and *divergence* are distinct forms of accommodation, where a speaker either aligns or distances themselves from an interlocutor's linguistic patterns [@giles19911]. From all this information, it is apparent that the most crucial element of accommodation is *interaction* between *individuals*. However, experimental work suggests that *convergence* may also occur from imitating voices via headphones or speakers [@delvaux2007influence], which proves that direct interaction is not required.    
+</p>
+<p style="text-align: justify;">
+For a considerable period, there has been a longstanding debate regarding the potential influence of television on language, particularly in terms of accent change. This is due to the fact that watching TV lacks the interactive element, which is considered a crucial component for L2 acquisition. As previously mentioned, it has been observed that speakers tend to align their speech patterns with mediated input, even in situations where there is no direct interaction or a visible conversation partner. According to @stuart2013television, **engagement** with new linguistic input is a more important factor than interaction in the context of convergence and dialect learning. @stuart2013television emphasized that the level of psychological engagement with a specific television show plays a pivotal role in determining how much it contributes as a catalyst for linguistic change on the phonological level.  
+</p>
+
+
+## The present study
+
+<p style="text-align: justify;">
+In this study, we focused on examining accommodation-driven shifts that occur independent of *external* or *self-directed* instruction. The first objective was to investigate (a) whether leisurely watching television has the potential to induce changes in an individual's linguistic behaviors, particularly in pronunciation, thereby influencing the restructuring of phonological systems and their corresponding phonetic representations. The second objective was to explore (b) whether this form of accommodation is contingent upon the *emotional* and *psychological engagement* of the viewer with the television series and its characters. Unlike @stuart2013television's experiment, which focused on native speakers of English, our study extends the investigation to **L2 accommodation**, examining the *engagement* factor. Additionally, we have distinguished the *engagement* factor into two separate independent variables: *engagement*, representing participants' engagement with the series, and *involvement*, defining participants' emotional involvement with the series' characters.
+</p>
+<p style="text-align: justify;">
+The competing phonological systems of the study are American and British English, and the response variable is rhoticity. In rhotic varieties of English, the 'r' sound is pronounced in all positions of words (e.g., word-initially, word-medially, and word-finally). On the other hand, in non-rhotic varieties, the 'r' sound is not pronounced at the end of words or in postvocalic environments [@Costa_2022], meaning it occurs after a vowel. For this reason, the non-rhotic /r/ sound is also referred to as 'postvocalic' /r/. British English accents, particularly those from southwest England, are considered non-rhotic, while certain American English accents, primarily from northern and western states of the US, are classified as rhotic [@Costa_2022]. 
+</p>
+<p style="text-align: justify;">
+In our study, we examine the presence or absence of the postvocalic /r/ sound in participants' recordings both before and after media exposure. Along with the variables of *condition* (pre- and post-exposure), *engagement*, and *involvement*, we have included the independent variables *group* and *aptitude*. The *group* variable denotes the accent (American or British) that was assigned to participants, based on the television series they were exposed, while aptitude reflects their overall proficiency in English. First, we predict that the media exposure will influence both groups accents according to their television series. However, this effect may be slightly less in the American English group, given that the participants are native Italian speakers. Furthermore, we anticipate that the *group* with the highest of *engagement* and *involvement* ratings will exhibit greater variability in their accents following the media exposure. Lastly, it is predicted that the group with high *aptitude* ratings will also exhibit a significant L2 accommodation effect, indicating a greater degree of linguistic adaptation to the media content.  
+</p>
+
+
+# Method
+
+<p style="text-align: justify;"> The current section provides comprehensive details about the experiment's methodology, covering aspects such as the number of participants, materials used, procedural steps, and additional insights derived from the study's dataset concerning the experiment's measurements (i.e., dependent and independent variables). This section is organized into four parts: **participants**, **materials**, **procedure**, and **data exploration**. </p>
+
+## Participants
+
+<p style="text-align: justify;"> In the current study, **18** participants were recruited and divided equally into two groups: *American English* and *British English*, with **9** participants in each group. They are native Italian speakers who have acquired English as their second language (L2). The dataset does not include additional demographic information, such as the participants' ages. </p>
+
+
+```{r, message=FALSE, echo=FALSE}
+
+# Distinct number of participants
+num_participants <- n_distinct(rhoticity_dataset$participant) 
+
+
+# Number of participants in American English group
+american_participants <- rhoticity_dataset %>%
+  filter(group == "american english") %>%
+  summarize(count = n_distinct(participant))
+
+
+# Distinct number of participants in British English group
+british_participants <- rhoticity_dataset %>%
+  filter(group == "british english") %>%
+  summarize(count = n_distinct(participant))
+
+
+# Create a table that includes all the counts
+tibble(
+  Category = c("Total Participants", "American group", "British group"),
+  N = c(num_participants, american_participants$count, british_participants$count)
+) %>% kable(caption = "Total number of participants with/ without groups (N)") %>% kable_styling()
+
+```
+
+## Materials
+
+<p style="text-align: justify;">
+A list of sentences in *English* was primarily composed by the study's second author. The sentences included **51** words containing **postvocalic /r/** sounds. Some words were read **18** or **17** (e.g., driver and wears) times by the participants, while others were read **36** or **35** (e.g., learn) times. The reason behind the reduced number of reading times for those words is that their rows contained missing values (NA), and as a result, they were removed from the dataset. The **postvocalic /r/** sounds occur in word-medial (e.g., birthday) and word-final (e.g., bar) positions, as indicated in the table below. The participants' speech data were recorded before and after exposure to the media.
+</p>
+
+```{r, echo=FALSE}
+
+# Calculate the total number of distinct words across both conditions
+n_distinct(rhoticity_dataset$word) %>% kable(caption = "Total number of distinct words (N) with postvocalic /r/ sounds", col.names = 'N') %>% kable_styling() 
+
+# Count all the instances of the words for each condition
+sentences_list <- rhoticity_dataset %>%
+  group_by(condition, word, .drop = FALSE) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  pivot_wider(names_from = condition, values_from = count, values_fill = 0) %>% 
+  select(word, before, after)
+
+kable(sentences_list, caption = "Words with postvocalic /r/ sounds used in the study") %>%
+  kable_styling()
+
+```
+
+## Procedure
+
+<p style="text-align: justify;">
+Participants were instructed to read the list of English sentences and respond to interview questions. As stated previously, these sentences contained words with **postvocalic /r/** sounds, and participants were recorded reading them *before* and *after* their exposure to the selected television series. The focus was placed on whether participants, *after* the media exposure, pronounced or didn't pronounce the **postvocalic /r/** in the words.
+</p>
+
+<p style="text-align: justify;">
+The series chosen for media exposure were the popular shows *"Atypical"* (produced in American English) or <em>"The End of the F\*ing World"</em> (produced in British English) from Netflix. These series were selected not only for their popularity but also for the authenticity of the accents they featured, aligning with the study's objectives. Participants divided into two groups, American and British English, were assigned to watch one of the series accordingly for a duration of two weeks. After the media exposure, participants completed a questionnaire, focusing on their English language history, self-evaluation of their accents, viewing habits, and engagement with the series. Furthermore, the study monitored whether participants had prior exposure to the designated series or encountered other English accents during the experiment.
+</p>
+
+## Data Exploration
+
+<p style="text-align: justify;">
+In preparation for data modeling in this study, a comprehensive examination of the provided dataset was conducted. This involved performing descriptive statistics on the *dependent variable* within the *value* column, as well as on the *independent variables* - *aptitude, engagement,* and *involvement*, whose names correspond to the dataset columns. Additionally, the section provides insights into the number of speech data provided by each participant in both conditions (i.e., before and after). The *Data Exploration* section is subdivided into three parts: *Speech Data*, *Presence of postvocalic /r/*, and *Aptitude, Engagement, and Involvement*.
+</p>
+
+### Speech Data
+
+<p style="text-align: justify;">
+The current section delves into the data within the *participant* and *condition* columns. As previously mentioned, speech data were recorded from **18** different participants. Upon further examination, it was observed that each participant contributed **55** or **54** (in case of NAs in the dataset) speech data recordings for each *condition* (i.e., before and after media exposure), resulting in a total of **110** data points. Out of these, **109** and **108** data points were obtained from participants, taking into account instances with NAs. This discovery highlights the presence of multiple data points from each participant, leading to the selection of a linear mixed effects model for data analysis.
+</p>
+
+```{r, echo=FALSE}
+
+# Count total observations of each participant in the dataset
+table(rhoticity_dataset$participant) %>% kable(caption = "Data Points for each Participant", col.names = c('Participant','Data Points')) %>% kable_styling() 
+
+
+# Count total observations of each participant by condition (before a. after)
+observations_by_condition <- rhoticity_dataset %>%
+  group_by(condition, participant, .drop = FALSE) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  pivot_wider(names_from = condition, values_from = count, values_fill = 0) %>% 
+  select(participant, before, after)
+
+kable(observations_by_condition, caption = "Number of Data Points by Participant and Condition") %>%
+  kable_styling()
+```
+
+### Presence of postvocalic /r/
+
+<p style="text-align: justify;">
+The dependent variable of this study pertains to the presence or absence of the **postvocalic /r/** sound in the recorded speech data, both *before* and *after* media exposure. As previously stated, the focus is primarily on the presence of the **postvocalic /r/** *after* exposure to the television series. The variable is quantified using binary values (**0-1**), indicating the absence or presence of the sound, respectively.
+</p>
+
+<p style="text-align: justify;">
+Upon conducting descriptive statistics on the response variable, which included calculating the mean and standard deviation (SD), several key observations emerged. In the *before* condition, the response variable data for the **American English** group displayed a mean of **0.54** with a corresponding SD of **0.50**. Conversely, the **British English** group exhibited a mean of **0.48** and a similar SD of **0.50**. This indicates that there is greater variability in the responses of the British group compared to the American group, considering the response variable's range from 0 to 1.
+</p>
+
+<p style="text-align: justify;">
+In the *after* condition, a noteworthy shift in means is evident. The mean of the **American group** has increased to **0.58**, while the mean of the **British group** has decreased to **0.43**. This signifies that the presence of **postvocalic /r/** is more pronounced in the **American group** in contrast to the **British group**. Additionally, the SD of the **American group** has decreased to **0.49**, while the SD of the **British group** remains at **0.50**. This suggests that there is still relatively more variability in the data produced by the **British group**. The box plot below demonstrates the descriptive measurements of the response variable between the two groups in both conditions.
+</p>
+
+<p style="text-align: justify;">
+Since the dependent variable contains the binary values **0-1**, which are categorical, this leads to the decision of selecting a *logistic regression model* for the data analysis. Furthermore, as it was found out that there are multiple observations for each participant in the dataset, this solidifies the decision of fitting a **generalized linear mixed effects model** (GLMER). A more thorough understanding of the significance of the observed differences between the two groups in both conditions, as well as which independent variables are significant factors for L2 accommodation in an unstructured, uninstructed media setting, is provided in the **Results** section.
+</p>
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+### descriptive measures for postvocalic /r/ sound occurrence
+rhoticity_dataset %>% 
+  group_by(group, condition) %>% 
+  summarize(mean = round(mean(value),2),
+            sd = round(sd(value),2)) %>% 
+  ungroup() %>%
+  arrange(group, desc(condition)) %>%  # This line sorts the data by 'condition'
+  kable() %>%
+  kable_styling
+```
+
+```{r, echo=FALSE, message=FALSE, out.width="100%"}
+
+### visualize 
+rhoticity_dataset %>%
+  group_by(participant, condition, group) %>%
+  summarize(mean_occurrence = round(mean(value),2)) %>%
+  ungroup() %>% 
+  ggplot(aes(x = condition, y = mean_occurrence, fill = group)) + 
+    geom_boxplot() +
+    geom_jitter(width = 0.2) +
+    stat_summary(fun=mean, geom='point', shape=17, size=2) +
+    theme(legend.position='right',
+          axis.text.x = element_text(size = 15),  # Font size of x/y-axis
+          axis.text.y = element_text(size = 15),  
+          axis.title.x = element_text(size = 15), # Font size of x/y-labels
+          axis.title.y = element_text(size = 15),
+          legend.title = element_text(size = 15),
+          legend.text = element_text(size = 15)   # Font size of legend
+    )
+
+```
+
+### Aptitude, Engagement, and Involvement
+
+<p style="text-align: justify;">
+The columns that contain the measurements *aptitude, engagement* and *involvement* refer to participants' English aptitude, their engagement with the series and their emotional involvement with the series' characters respectively. The data for these measurements were obtained once after the media exposure when participants were asked to complete the questionnaire. Therefore, the data for these measurements remain consistent across both conditions in the dataset (i.e., before and after exposure to the media).
+</p>
+
+<p style="text-align: justify;">
+The *aptitude* variable is measured on a scale from **1** (low aptitude) to **16** (high aptitude), where **higher scores** indicate **greater** aptitude in English. The same logic applies to the other two variables, *engagement* and *involvement*: the highest the score, the more participants were engaged with the series or emotionally involved with the characters. Unlike aptitude, engagement and involvement are measured on different scales: the *engagement* variable is measured on a scale from **2.5** to **7.5**, while the *involvement* variable is measured on a scale from **4** to **11.5**. The table below illustrates the mentioned ranges for each variable:
+</p>
+
+```{r, echo=FALSE}
+
+# Find the ranges of the measurements
+aptitude_range <- range(rhoticity_dataset$aptitude)
+engagement_range <- range(rhoticity_dataset$engagement)
+involvement_range <- range(rhoticity_dataset$involvement)
+
+
+# Combine the ranges into a tibble
+ranges_tbl <- tibble(
+  Measurement = c("Aptitude", "Engagement", "Involvement"),
+  Range = c(paste(aptitude_range, collapse = " - "),
+            paste(engagement_range, collapse = " - "),
+            paste(involvement_range, collapse = " - ")))
+
+# Ranges table
+ranges_tbl %>% kable(caption = "Ranges of the Measurements: aptitude, engagement and involvement") %>% kable_styling()
+
+```
+
+<p style="text-align: justify;">
+Furthermore, descriptive statistics were calculated, including the **mean** and **standard deviation** (SD), for the variables in both participant groups. According to the tables below, it is demonstrated that the mean of the *aptitude* variable for the American English group is **9.8**, while for the British English group it is **12.0**. The means indicate that the British group exhibits a higher level of aptitude in English. The SDs for the *aptitude* scores are **3.0** for the American group and **4.3** for the British group, which suggests that there is greater variability in *aptitude* scores among participants in the British group.
+</p>
+
+<p style="text-align: justify;">
+As for the *engagement* variable, the British group has a higher mean with a score of **5.0** compared to the American English group's mean of **3.9**. The SDs for the *engagement* scores are **1.0** for the American group and **1.6** for the British group, indicating the spread of scores around the mean for each group.
+</p>
+
+<p style="text-align: justify;">
+Finally, the mean of the *involvement* variable shows similar values between the two groups, specifically **7.2** for the American English group and **7.8** for the British English group. The SDs for the *involvement* scores are **1.8** for the American group and **2.2** for the British group.
+</p>
+
+```{r, echo=FALSE}
+
+# Aptitude: mean and SD for both groups
+rhoticity_dataset %>% 
+  group_by(group) %>% 
+  summarize(  
+    n = n_distinct(participant), 
+    aptitude_mean = round(mean(aptitude),1),
+    aptitude_sd = round(sd(aptitude),1)) %>% 
+  ungroup() %>% 
+  kable(caption = "Descriptive measures for Aptitude", col.names = c("Group","Number of participants", "Mean", "SD")) %>% kable_styling()
+
+
+# Engagement: mean and SD for both groups
+rhoticity_dataset %>% filter(condition == "after") %>% 
+  group_by(group) %>% 
+  summarize(  
+    n = n_distinct(participant), 
+    aptitude_mean = round(mean(engagement),1),
+    aptitude_sd = round(sd(engagement),1)) %>%
+  ungroup() %>% 
+  kable(caption = "Descriptive measures for Engagement", col.names = c("Group","Number of participants", "Mean", "SD")) %>% kable_styling()
+
+
+# Involvement: mean and SD for both groups
+rhoticity_dataset %>% 
+  group_by(group) %>% 
+  summarize(  
+    n = n_distinct(participant), 
+    aptitude_mean = round(mean(involvement),1),
+    aptitude_sd = round(sd(involvement),1)) %>% 
+  ungroup() %>% 
+  kable(caption = "Descriptive measures for Involvement", col.names = c("Group","Number of participants", "Mean", "SD")) %>% kable_styling()
+```
+
+
+## Preparation of the data for the model
+
+<p style="text-align: justify;">
+To prepare the data for the GLMER model, character data (participant, group, condition, and word) and the response variable *value* are converted into **factors**. Additionally, numeric independent variables (aptitude, engagement, and involvement) undergo standardization to ensure consistent scaling for meaningful interpretation within the model. Furthermore, the reference level of the categorical variable *condition* has been changed from *after* to *before* to enhance result interpretation. Correlations between the numerical independent variables are also checked. According to the correlation plot, there are no correlations among the variables.
+</p>
+
+```{r, message=FALSE, warning=FALSE}
+
+rhoticity_dataset %>%
+  select(participant, group, aptitude, condition, engagement, involvement, value, word) %>%
+  mutate_if(is.character, as.factor) %>%  # Transform character data
+  mutate(aptitude = scale(aptitude),   # Transform numeric predictors
+    engagement = scale(engagement),
+    involvement = scale(involvement),
+    value = as_factor(value)
+  ) -> df_rhoticity
+
+
+df_rhoticity$condition <- relevel(df_rhoticity$condition, ref = "before")
+levels(df_rhoticity$condition) %>% kable(col.names = "Order of the levels of variable condition") %>% kable_styling()
+```
+
+
+```{r, echo=FALSE, out.width="100%"}
+rhoticity_dataset %>% 
+  group_by(group) %>% 
+  mutate(occurrence_mean = mean(value)) %>% 
+  ungroup() %>% 
+  select(
+    aptitude, engagement, involvement, occurrence_mean
+  ) -> cor
+round(cor(cor),1) -> cor
+ggcorrplot::ggcorrplot(cor, hc.order = T, 
+                       type = "lower", 
+                       lab = T, 
+                       lab_size = 4, 
+                       method = "square", 
+                       colors = c("coral3", "white", "cyan3"),
+                       title = "Correlation")
+```
+
+
+## The model
+
+<p style="text-align: justify;">
+A GLMER model was fitted to analyze the presence or the absence of the **postvocalic /r/** before and after the media exposure in participants' recordings. The model included *condition* (before vs. after), *group* (British English vs. American English), *engagement*, *involvement* and *aptitude*, as well as their interactions as fixed predictors. In this model, **two** two-way interactions and **one** three-way interaction were constructed. The first two-way interaction is between *condition* and *group*, while the second one is between *group* and *involvement*. The three-way interaction consists of *condition, engagement* and *aptitude*. Random effects for participants and words were included to address individual variability. Specifically, random intercepts were added for participants and words, along with a random effect for the condition variable within participants. These random effects enhance the model's ability to capture nuanced variations in the response variable. The BOBYQA optimizer is implemented in the GLMER formula to sustain model convergence.  
+</p>
+
+```{r}
+df_rhoticity %>% glmer(formula = value ~ condition * group +
+                          group * involvement +
+                         condition * engagement * aptitude +
+                         (1+condition|participant) + (1|word),
+                       family = "binomial",
+                       control = glmerControl(optimizer = "bobyqa", 
+                                              optCtrl = list(maxfun = 100000))
+                       ) -> rhoticity_model
+```
+
+
+
+```{r, echo=FALSE}
+drop1(rhoticity_model, test = "Chisq")
+```
+
+
+
+# Results
+
+<p style="text-align: justify;">
+According to the output of the GLMER rhoticity model, the effect of condition 'after' is statistically significant (p < 0.05) and positive in comparison to condition 'before', which serves as the model's intercept reference level. This indicates an increase in participant's pronunciation after media exposure (Std. beta = 0.56; 95% CI [0.19, 0.94]). The interaction effect of involvement on group 'British English' is also statistically significant and positive (p = 0.030; Std. beta = 1.14; 95% CI [0.11, 2.16]), suggesting a notable impact on the British English group. Similarly, the interaction effect of engagement on condition 'after' is statistically significant and positive (p < .001; Std. beta = 0.59, 95% CI [0.31, 0.86]), indicating a pronounced influence of engagement on pronunciation post-exposure. Lastly, the interaction effect of aptitude on the interaction of condition 'after' and engagement is statistically significant and negative (p = 0.002; Std. beta = -0.54; 95% CI [-0.87, -0.20]), implying a potentially inhibiting influence of aptitude on the accommodation effect.
+</p>
+
+```{r, echo=FALSE, eval=FALSE}
+summary(rhoticity_model)
+```
+
+
+```{r, echo=FALSE, eval=FALSE}
+Anova(rhoticity_model, type = "III") 
+```
+
+
+## Odds ratios interpretation
+
+<p style="text-align: justify;">
+As mentioned earlier, the reference level for the *condition* variable is 'before'. In the odds ratios plot below, the likelihood of participants pronouncing the postvocalic /r/ sound is reported in the 'after' condition. The blue figures, located on the right side, indicate the fixed effects and their interactions associated with the pronunciation of the postvocalic /r/ sound, while the red figures represent the opposite. 
+</p>
+
+```{r, echo=FALSE, out.width="100%"}
+plot_model(rhoticity_model, type = "est", sort.est = TRUE)
+```
+
+
+```{r, echo=FALSE}
+tab_model(rhoticity_model, CSS = css_theme("cells"))
+```
+
+
+
+## Post-hoc analysis and visualisations
+
+<p style="text-align: justify;">
+In the post-hoc analysis of the two-way interaction *group* and *involvement*, it is indicated that the difference in involvement between the two groups is statistically significant.
+</p>
+
+```{r}
+emtrends(rhoticity_model, pairwise ~ group, var = "involvement", infer=T, adjust='bonferroni')$contrasts
+```
+
+<p style="text-align: justify;">
+In the "before" condition, there is no statistically significant difference in the likelihood of postvocalic /r/ pronunciation between American English and British English speakers. However, in the "after" condition, there is a statistically significant difference. American English speakers are 1.421 times more likely to pronounce postvocalic /r/ compared to British English speakers (estimate = 1.421, SE = 0.621, z.ratio = 2.288, p = 0.0221). This indicates a significant shift in pronunciation patterns after media exposure.
+</p>
+<p style="text-align: justify;">
+Comparing the estimated effects and p-values, it is observed: in the American English group, the contrast "before - after" has a stronger effect compared to the British English group.
+Both contrasts are statistically significant in their respective groups.
+</p>
+
+```{r}
+emmeans(rhoticity_model, pairwise ~ group|condition, adjust = "bonferroni")$contrasts
+emmeans(rhoticity_model, pairwise ~ condition|group, adjust = "bonferroni")$contrasts
+```
+
+
+```{r, echo=FALSE, out.width="100%"}
+plot_model(rhoticity_model, type = "pred", terms = c("condition", "group"))
+plot_model(rhoticity_model, type = "pred", terms = c("engagement", "condition", "group"))
+plot_model(rhoticity_model, type = "pred", terms = c("involvement", "group"))
+```
+
+
+# Discussion
+
+<p style="text-align: justify;">
+The findings of this study show that media exposure has an effect on the pronunciation of the participants over a two-week period, which proves that accommodation-shifts can occur regardless of internal or external-instruction. This finding aligns with the study of @Moyer_2014 for exceptional learners in L2 phonology, who had listed the activity of watching TV as one of the main factors that have contributed to their exceptional pronunciation skills. Additionally, it was found that there are significant interaction effects between condition and group, condition and engagement, as well as group and involvement. The first interaction proves the accommodation-shift, which occurs in the after condition, and the fact that it happens accordingly to the television series accent. The participants that watched the american show were consistently pronouncing the /r/ sound in the middle and final position of the words, while the participants of the British group started pronouncing less the postvocalic /r/ sound.
+</p>
+<p style="text-align: justify;">
+Regarding the factors of **engagement** and **involvement**, it is observed that the effect of **engagement** is more prominent than the effect of **involvement**. Nevertheless, both are considered significant predictors for the model's predictions regarding L2 accommodation. This finding aligns with the hypothesis that both variables will be significant for L2-accommodation shifts, as well as with the findings of @stuart2013television for L1. Another predictor that is shown having significant effect on the interaction between **condition** and **engagement** is **aptitude**. **Aptitude** was found to have negative effect on the interaction, which might suggest that it does not contribute to L2-accommodation effect as much as **engagement**.    
+</p>
+<p style="text-align: justify;">
+Even though, it is not reported in the experiment whether participants were watching the series with or without subtitles in their native or L2 language [@Mitterer_2009; @birules2016watching; @scheffler2023learning; @wisniewska2020can], the effects of media exposure on speech production are consistent with these studies. As future research, it would be interesting to see if captions in L2 facilitate the accommodation-shifts.
+</p>
+
+
+# References
